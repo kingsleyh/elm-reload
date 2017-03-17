@@ -1,0 +1,13 @@
+{
+	"name": "elm-reload",
+	"authors": [
+		"Kingsleyh"
+	],
+	"dependencies": {
+		"rainbow":"~master",
+		"jsonizer": "~>0.6.0"
+	},
+	"description": "Elm reloader",
+	"copyright": "Copyright © 2017, Hendrickse",
+	"license": "proprietary"
+}
