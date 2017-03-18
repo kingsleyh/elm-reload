@@ -165,28 +165,17 @@ class ElmReload {
   private void checkLRDeps(){
     auto cmd = "npm list -g tiny-lr";
     auto exec = executeShell(cmd);
-    if(exec.status !=0){
-      writeln("[ERROR] - could not execute npm command: " ~ cmd);
-      writeln(exec.output.rainbow.lightRed);
-      } else {
-        auto output = exec.output;
-        if(canFind("ERR!",output)){
-          writeln(output.rainbow.lightRed);
-          writeln("attempting to auto install tiny-lr");
-          auto cmd2 = "npm install -g tiny-lr && npm link tiny-lr";
-          writeln("running command: " ~ cmd2);
-          auto exec2 = executeShell(cmd2);
-          if(exec.status !=0){
-            writeln("[ERROR] - could not execute npm command: " ~ cmd2);
-            writeln(exec2.output.rainbow.lightRed);
-          } else {
-            writeln("Successfully installed and linked tiny-lr live reload server!".rainbow.lightGreen);
-            writeln(output.rainbow.lightGreen);
-          }
-        } else {
-          writeln("Great you have everything needed for live reload!".rainbow.lightGreen);
-        }
-      }
+    auto output = exec.output;
+    if(canFind(output, "ERR!")){
+      writeln(output.rainbow.lightRed);
+      writeln("attempting to auto install tiny-lr");
+      auto cmd2 = "npm install -g tiny-lr && npm link tiny-lr";
+      writeln("running command: " ~ cmd2);
+      auto exec2 = executeShell(cmd2);
+      writeln("Successfully installed and linked tiny-lr live reload server!".rainbow.lightGreen);
+    } else {
+      writeln("Great you have everything needed for live reload!".rainbow.lightGreen);
+    }
   }
 
   private void liveReloadServer(){
@@ -237,6 +226,7 @@ class ElmReload {
        if(exec.status !=0){
          writeln("[ERROR] - could not execute elm-make");
          writeln(exec.output.rainbow.lightRed);
+         handleMissingPackages(exec.output, baseDir, cmd);
        } else {
           auto output = exec.output;
           if(canFind("ERROR",output)){
@@ -250,6 +240,23 @@ class ElmReload {
     }
   }
 
+  private void handleMissingPackages(string content, string baseDir, string compileCommand){
+    if(canFind(content, "Could not find package")){
+      writeln("Detected missing packages - attempting to correct".rainbow.magenta);
+      auto command = "cd " ~ baseDir ~ " && elm-package install --yes";
+      writeln("executing command: ".rainbow.magenta, command.rainbow.lightBlue);
+      auto exec = executeShell(command);
+      if(exec.status != 0){
+        writeln("[ERROR] - could not correct missing packages".rainbow.lightRed);
+        writeln(exec.output.rainbow.red);
+      } else {
+        writeln("Successfully corrected missing packages - proceeding".rainbow.lightGreen);
+        writeln(exec.output.rainbow.lightGreen);
+        executeShell(compileCommand);
+      }
+    }
+
+  }
 
   private bool hasSameBaseDir(EntryPoint[] entries) {
     return entries.map!(e => e.baseDirectory).uniq.array.length == 1;
