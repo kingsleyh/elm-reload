@@ -2,7 +2,7 @@
 
 A simple build tool and very basic webpack replacement
 
-Currently it only works and is tested on OSX. It will probably work find on linux bases systems
+Currently it only works and is tested on OSX. It will probably work fine on linux based systems
 but has not been tested. It's not going to work on Windows platforms - if you want it to work on 
 Windows platforms - raise an issue and I will make it so. 
 
