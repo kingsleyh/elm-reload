@@ -73,7 +73,7 @@ Each section has some config options - all sections are mandatory and must be pr
  | baseDirectory  | base directory to start watching files from - its relative to the directory where the elm-reload binary is executed  |
  | fileTypes      | file extensions to watch |
  | exclusions     | directories to exclude (matches name in the filepath)| 
- | inclusions     | extra directories to include (matches on name in the filepath|
+ | inclusions     | extra directories to include (path is relative to the baseDirectory)|
  
 #### Reload
 
