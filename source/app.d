@@ -17,6 +17,8 @@ import std.range;
 import std.socket;
 import std.net.curl;
 import std.conv;
+import std.algorithm.iteration;
+import core.stdc.stdlib;
 
 struct EntryPoint
 {
@@ -40,6 +42,7 @@ struct Watch
     string baseDirectory;
     string[] fileTypes;
     string[] exclusions;
+    string[] inclusions;
   }
 
 }
@@ -87,13 +90,15 @@ class ElmReload {
   string watchBaseDir;
   string port;
   int reloadDuration;
+  bool showNumberFilesWatched;
 
-  this(Config config, string currentDir, int reloadDuration){
+  this(Config config, string currentDir, int reloadDuration, bool showNumberFilesWatched){
     this.config = config;
     this.rootDir = currentDir;
     this.watchBaseDir = currentDir ~ "/" ~ applyVariables(applyVariables(config.watch.baseDirectory));
     this.port = getPort();
     this.reloadDuration = reloadDuration;
+    this.showNumberFilesWatched = showNumberFilesWatched;
   }
 
   public void runOnce(){
@@ -142,7 +147,15 @@ class ElmReload {
     foreach( command ; this.config.commands){
       command = applyVariables(applyVariables(command));
       writeln("running command: ".rainbow.magenta, command.rainbow.lightBlue);
-      executeShell(command);
+      auto res = executeShell(command);
+      if(res.status != 0){
+        writeln("[ERROR] failed to execute command: ".rainbow.red, command.rainbow.lightBlue);
+        writeln("with exception: ".rainbow.red);
+        writeln(res.output.rainbow.red);
+        exit(res.status);
+      } else {
+//        writeln("Successfully executed command: ".rainbow.lightGreen, command.rainbow.lightGreen);
+      }
     }
   }
 
@@ -274,7 +287,12 @@ class ElmReload {
   private FileChanged hasFileChanged(){
     auto filePattern = "*.{" ~ this.config.watch.fileTypes.join(",") ~ "}";
     auto filesToCheck = dirEntries(this.watchBaseDir,filePattern, SpanMode.depth);
-    auto filesToCheckModified = filesToCheck.array.filter!(f => containsNoExclusion(f.name)).array;
+    auto inclusions = this.config.watch.inclusions.map!(i => dirEntries(i, filePattern, SpanMode.depth)).joiner.array;
+    auto filesToCheckModified = filesToCheck.array.filter!(f => containsNoExclusion(f.name)).array ~ inclusions;
+    auto filesWatched = filesToCheckModified.length;
+    if(this.showNumberFilesWatched){
+      writeln("watching ".rainbow.lightBlue, to!string(filesWatched).rainbow.magenta, " files of type: ".rainbow.lightBlue,  filePattern.rainbow.magenta);
+    }
     foreach(aFile ; filesToCheckModified){
       if(isFile(aFile)){
         auto key = aFile.name;
@@ -321,6 +339,7 @@ bool showHelp = false;
 int duration = 1500;
 bool ver;
 bool ex;
+bool files = false;
 
 void main(string[] args)
 {
@@ -375,14 +394,15 @@ void main(string[] args)
     arraySep = ",";
     auto helpInformation = getopt(
       args,
-      "run|r", "Run the compiler once only", &run,
-      "watch|w", "Watch file changes and run in a loop", &watch,
+      "run|r",      "Run the compiler once only", &run,
+      "watch|w",    "Watch file changes and run in a loop", &watch,
       "duration|d", "Set the reload duration in ms (defaults to " ~ to!string(duration) ~ ")", &duration,
-      "version|v",    "Shows version of this app", &ver,
-      "example|e",    "Shows example config", &ex
+      "version|v",  "Shows version of this app", &ver,
+      "example|e",  "Shows example config", &ex,
+      "files|f",    "Shows number of files watched", &files
     );
 
-    auto currentVersion = "v0.0.1";
+    auto currentVersion = "v0.0.2";
 
     if(helpInformation.helpWanted || showHelp)
     {
@@ -392,7 +412,7 @@ void main(string[] args)
    // start doing the stuff
 
    auto config = configFile.readJSON!(Config);
-   auto elmReload = new ElmReload(config, currentDir, duration);
+   auto elmReload = new ElmReload(config, currentDir, duration, files);
 
    if(watch){
      elmReload.reload();
