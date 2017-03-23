@@ -370,7 +370,7 @@ void main(string[] args)
   ],
   "entryPoints" : [
     {
-      "baseDirectory" : "path/to/elm-package.json/relative/to/directory/elm-reload/is/executed/in",
+      "baseDirectory" : "base/path/to/locate/entry/and/output/files",
       "entryFile" : "path/to/Main.elm/relative/to/baseDirectory",
       "outputFile" : "path/to/outputFile.js/relative/to/baseDirectory"
     }
