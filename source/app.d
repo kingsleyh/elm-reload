@@ -352,7 +352,8 @@ void main(string[] args)
     "exclusions": [
       "node_modules",
       "elm-stuff"
-    ]
+    ],
+    "inclusions":[]
   },
   "reload": {
     "enabled": true,
