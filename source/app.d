@@ -108,10 +108,10 @@ class ElmReload {
 
   public void reload(){
     runOnce();
-    appendLiveReload();
 
     if(this.config.reload.enabled){
       writeln(("reload wait time set to: " ~ to!string(this.reloadDuration) ~ " ms").rainbow.magenta);
+      appendLiveReload();
       liveReloadServer();
     }
 
@@ -122,9 +122,9 @@ class ElmReload {
         auto fileChange = hasFileChanged();
         if(fileChange.changed){
            runOnce();
-           appendLiveReload();
 
            if(this.config.reload.enabled){
+             appendLiveReload();
              liveReloadNotify(fileChange.fileName);
            }
 
