@@ -53,6 +53,9 @@ executed from. The file is called: elm-reload-config.json
         "rm -rf £target/webapp",
         "mkdir -p £target/app/common/assets/css && lessc £common/common/stylesheets/app/styles.less -x £target/app/common/assets/css/styles.css"
       ],
+      "after" : [
+        "echo 'Runs after elm code is compiled'"
+      ],
       "entryPoints" : [
         {
           "baseDirectory" : "base/path/to/locate/entry/and/output/files",
@@ -97,7 +100,12 @@ There is a build in variable called £root which is the absolute path to the dir
 
 #### Commands
 
-An array of command line item to execute. They are executed in a local shell. You can use the variables defined in the Variables section in here. This is useful for copying files, running the less compiler, install things etc. 
+An array of command line item to execute before elm compile has run. They are executed in a local shell. You can use the variables defined in the Variables section in here. This is useful for copying files, running the less compiler, install things etc. 
+     
+#### After (Commands)
+
+An array of command line item to execute after elm compile has run. They are executed in a local shell. You can use the variables defined in the Variables section in here. This is useful for copying files, running the less compiler, install things etc. 
+   
      
 #### Entry Points for elm
 

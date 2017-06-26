@@ -70,6 +70,7 @@ struct Config
     Watch watch;
     Reload reload;
     string[] commands;
+    string[] after;
     string[string] variables;
    }
 }
@@ -104,6 +105,7 @@ class ElmReload {
   public void runOnce(){
     executeCommands();
     compileElm();
+    executeAfterCommands();
   }
 
   public void reload(){
@@ -143,19 +145,29 @@ class ElmReload {
    return content;
  }
 
+  private void execCommands(string command){
+    command = applyVariables(applyVariables(command));
+    writeln("running command: ".rainbow.magenta, command.rainbow.lightBlue);
+    auto res = executeShell(command);
+    if(res.status != 0){
+      writeln("[ERROR] failed to execute command: ".rainbow.red, command.rainbow.lightBlue);
+      writeln("with exception: ".rainbow.red);
+      writeln(res.output.rainbow.red);
+      exit(res.status);
+    } else {
+//     writeln("Successfully executed command: ".rainbow.lightGreen, command.rainbow.lightGreen);
+    }
+  }
+
   private void executeCommands(){
     foreach( command ; this.config.commands){
-      command = applyVariables(applyVariables(command));
-      writeln("running command: ".rainbow.magenta, command.rainbow.lightBlue);
-      auto res = executeShell(command);
-      if(res.status != 0){
-        writeln("[ERROR] failed to execute command: ".rainbow.red, command.rainbow.lightBlue);
-        writeln("with exception: ".rainbow.red);
-        writeln(res.output.rainbow.red);
-        exit(res.status);
-      } else {
-//        writeln("Successfully executed command: ".rainbow.lightGreen, command.rainbow.lightGreen);
-      }
+      execCommands(command);
+    }
+  }
+
+  private void executeAfterCommands(){
+    foreach( command ; this.config.after){
+      execCommands(command);
     }
   }
 
@@ -368,6 +380,9 @@ void main(string[] args)
   "commands": [
     "rm -rf £target/webapp",
     "mkdir -p £target/app/common/assets/css && lessc £common/common/stylesheets/app/styles.less -x £target/app/common/assets/css/styles.css"
+  ],
+  "after" : [
+    "echo 'Runs after elm code is compiled'"
   ],
   "entryPoints" : [
     {
