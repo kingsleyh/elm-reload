@@ -1,0 +1,35 @@
+
+{
+  "watch": {
+    "baseDirectory": ".",
+    "fileTypes": ["elm","html","js"],
+    "exclusions": [
+      "node_modules",
+      "elm-stuff"
+    ],
+    "inclusions":[]
+  },
+  "reload": {
+    "enabled": false,
+    "port": "auto",
+    "entryFile": "£target/path/to/index.html"
+  },
+  "variables": {
+    "target": "£root/../../../target/classes/main/webapp",
+    "app": "£root",
+    "common": "£root/../../../../common/app"
+  },
+  "commands": [
+    "echo 'Runs before elm compile'"
+  ],
+  "after" : [
+    "echo 'Runs after elm code is compiled'"
+  ],
+  "entryPoints" : [
+    {
+      "baseDirectory" : "£root",
+      "entryFile" : "HelloWorld.elm",
+      "outputFile" : "hello-world.js"
+    }
+  ]
+}
