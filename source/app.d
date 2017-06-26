@@ -418,7 +418,7 @@ void main(string[] args)
       "files|f",    "Shows number of files watched", &files
     );
 
-    auto currentVersion = "v0.0.2";
+    auto currentVersion = "v0.0.3";
 
     if(helpInformation.helpWanted || showHelp)
     {
